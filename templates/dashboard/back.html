@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Thanks a lot</h1>
+    <p>Thank you <span class="text-capitalize text-warning">{{ name }}</span> for contacting us. We will get in touch with you very shortly. </p>
+    <a href="{% url 'dashboard' %}" class="btn btn-default">Back</a>
+
+{% endblock content %}

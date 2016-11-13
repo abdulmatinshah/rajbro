@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<h1>Purchases</h1>
+    {% regroup object_list by post_items as new_list %}
+
+    {% for post_item in new_list %}
+        <h2>{{ post_item.grouper|yesno:'Posted, Non-posted' }}</h2>
+        <table class="table table-bordered table-responsive table-striped">
+<thead>
+<tr>
+    <th>Sr.No.</th>
+    <th>Oder ID</th>
+    <th>Date</th>
+    <th>Amount(Rs.)</th>
+    <th>Items</th>
+    <th>Action</th>
+</tr>
+</thead>
+    <tbody>
+    {% for po in post_item.list %}
+    <tr>
+        <td>{{ forloop.counter }}.</td>
+        <td>{{ po.pk }}</td>
+        <td>{{ po.purchase_date }}</td>
+        <td>{{ po.amount }}</td>
+        <td>{{ po.get_line_items }}  </td>
+        <td>
+            <div class="btn-group">
+                {% if po.post_items %}
+                    <a href="{% url 'purchases:unpost_items' po.id %}" class="btn btn-success">Unpost</a>
+                {% else %}
+                    <a href="{% url 'purchases:post_items' po.id %}" class="btn btn-primary">Post</a>
+                {% endif %}
+                <a href="{{ po.get_absolute_url }}" class="btn btn-default">Edit</a>
+                 <a href="{% url 'purchases:delete_order' po.id %}" class="btn btn-warning">Delete</a>
+            </div>
+        </td>
+    </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+        {% endfor %}
+
+<a href="{% url 'purchases:order' %}" class="btn btn-success">New purchase order</a>
+{% endblock content %}

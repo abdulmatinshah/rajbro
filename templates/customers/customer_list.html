@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+{% for customer in object_list %}
+<h2>{{ customer }}</h2>
+    <table class="table table-responsive table-bordered table-striped">
+    <thead>
+    <tr class="bg-success">
+        <th>Order Id</th>
+        <th>Amount(Rs.)</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for so in customer.sales.all %}
+    <tr>
+        <td>{{ so.id }}</td>
+        <td>{{ so.amount }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+
+    </table>
+{% endfor %}
+{% endblock content %}

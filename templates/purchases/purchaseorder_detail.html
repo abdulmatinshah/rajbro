@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<h1>Purchase Order Detail/Posting</h1>
+        <div class="card">
+      <h3 class="card-header">Order No. {{ object.id }}</h3>
+      <div class="card-block">
+        <h4 class="card-title">Date: {{ object.purchase_date }}</h4>
+        <p class="card-text">Amount (Rs.): {{ object.amount }}</p>
+        <p class="card-text">{{ object.post_items|yesno:'Already Posted,Not yet posted' }}</p>
+        <a href="{% url 'purchases:posting' 'post' %}" class="btn btn-primary">Post to Inventory</a>
+        <a href="{% url 'purchases:posting' 'unpost' %}" class="btn btn-primary">Deduct Inventory</a>
+      </div>
+    </div>
+    <hr>
+
+<h4>Detail of Items Purchased:</h4>
+<table class="table table-bordered table-responsive table-striped">
+<thead class="bg-success">
+<tr>
+    <th>Sr.No.</th>
+    <th>Product</th>
+    <th>Quantity (boxes,pieces)</th>
+    <th>SubTotal (Rs.)</th>
+</tr>
+</thead>
+    <tbody>
+    {% for item in object.line_items.all %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ item.product }}</td>
+        <td>{{ item.to_boxes }}</td>
+        <td>{{ item.calculated_subtotal }}</td>
+    </tr>
+    {% endfor %}
+
+    </tbody>
+</table>
+
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <h3>Sale Order</h3>
+    <form action="" method="post">
+    {% csrf_token %}
+    <p>Form</p>
+    {{ form.as_p }}
+        <p>testfor</p>
+    {{ subform.as_p }}
+    <input type="submit" value="Save" class="btn btn-primary">
+    </form>
+{% endblock content %}
