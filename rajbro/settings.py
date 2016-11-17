@@ -93,13 +93,23 @@ WSGI_APPLICATION = 'rajbro.wsgi.application'
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'rajbro',
+#         'USER': 'admin',
+#         'PASSWORD': 'admin',
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'rajbro',
-        'USER': 'admin',
-        'PASSWORD': 'admin',
-        'HOST': '127.0.0.1',
+        'NAME': 'da172truikfs15',
+        'USER': 'pecwehrdoxtoko',
+        'PASSWORD': 'kKAYhtHmvPFbcz8MP6-S6jjRai',
+        'HOST': 'ec2-54-243-52-209.compute-1.amazonaws.com',
         'PORT': '5432',
     }
 }
