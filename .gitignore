@@ -7,7 +7,7 @@
 .idea/workspace.xml
 rajbro/__pycache__/*
 
-static/
+#static/
 media/
 db.sqlite3
 rajbro/settings/local.py
