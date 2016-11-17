@@ -18,3 +18,4 @@ wcwidth==0.1.7
 
 #gun
 gunicorn
+psycopg2
