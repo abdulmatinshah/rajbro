@@ -7,14 +7,14 @@ from rajbro.mixins import ToBoxMixin
 
 
 class Sale(models.Model):
-    customer = models.ForeignKey(Customer, related_name='sales')
+    customer = models.ForeignKey(Customer)
     sales_rep = models.ForeignKey(settings.AUTH_USER_MODEL)
     sale_date = models.DateField(auto_now_add=True)
     amount = models.DecimalField(max_digits=100, decimal_places=2, default=0)
     post_items = models.BooleanField(default=False)
 
-    class Meta:
-        ordering = ['customer']
+    # class Meta:
+    #     ordering = ['-sale_date']
 
     def save(self):
         self.amount = self.sale_line_items.aggregate(linetotal=models.Sum('linetotal'))['linetotal']
@@ -23,7 +23,7 @@ class Sale(models.Model):
         super().save()
 
     def __str__(self):
-        return 'Order No. {} (Amount Rs.{})'.format(self.id, self.amount)
+        return 'Sale No. {} (Amount Rs.{})'.format(self.id, self.amount)
 
     def get_absolute_url(self):
         return reverse('sales:create_order', kwargs={'id': self.id})
@@ -49,7 +49,7 @@ class SaleLineItem(ToBoxMixin, models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.sale_order.customer)
+        return 'SaleLineItem {}'.format(self.id)
 
 
     # def _get_calculated_linetotal(self):

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags staticfiles %}
+{% block content %}
+
+    <div class="row">
+    <div class="col-sm-6">
+        <h1>Invoices</h1>
+    </div>
+    <div class="col-sm-6">
+        <form action="" method="post" class="form-inline pull-right">
+            {% csrf_token %}
+            <input type="text" id="datepicker" name="d" value="{{ d }}" placeholder="yyyy/mm/dd" class="form-control">
+            <input type="submit" value="Get Invoice" class="btn btn-success">
+        </form>
+    </div>
+    </div>
+
+    {% regroup invoice|dictsort:'customer.name' by customer.name as customer_list %}
+    <h3>Orders for {{ asked_day|date:'l F j, Y' }}</h3>
+    {% for customer in customer_list %}
+       <h3 class="btn-warning"> Shop: {{ customer.grouper }}</h3>
+            <ul>
+                {% for sale_order in customer.list %}
+                    <h4>{{ sale_order }}</h4>
+                    <table class="table table-bordered table-responsive table-striped">
+                    <thead>
+                    <tr class="bg-success">
+                        <th>Product</th>
+                        <th>Quantity(box,piece)</th>
+                        <th>Qty(Nos.)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in sale_order.sale_line_items.all %}
+                            <tr>
+                                <td>{{ item.product }}</td>
+                                <td>{{ item.to_box }}</td>
+                                <td>{{ item.quantity }}</td>
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+                    </table>
+
+                {% endfor %}
+            </ul>
+    {% empty %}
+        <h3 class="bg-info">No orders for {{ asked_day|date:"SHORT_DATE_FORMAT" }} </h3>
+    {% endfor %}
+{% endblock content %}
+{% block head_extra %}
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+{% endblock head_extra %}
+{% block js_extra %}
+{#<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>#}
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script>
+$( "#datepicker" ).datepicker({
+    dateFormat: "yy/mm/dd"
+});
+</script>
+{% endblock js_extra %}

@@ -1,62 +1,60 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags staticfiles %}
+{% load crispy_forms_tags staticfiles mytags %}
 {% block content %}
+<h1>Gatepasses for {{ day|date:'l, F d, Y' }}</h1>
 
-    <div class="row">
-    <div class="col-sm-6">
-        <h1>Gatepass</h1>
-    </div>
-    <div class="col-sm-6">
-        <form action="" method="post" class="form-inline pull-right">
+<div class="row hidden-print"><hr>
+<form action="" method="post" class="form-inline">
             {% csrf_token %}
-            <input type="text" id="datepicker" name="d" value="{{ d }}" placeholder="yyyy/mm/dd" class="form-control">
+        <div class="col-md-6 col-md-push-6">
+            <p><input type="radio" name="dsr" value="0" id="all" {% ifequal '0' dsr_id %}  checked="checked" {% endifequal %}><label for="all">All</label></p>
+            {% for dsr in sale_reps %}
+            <p>
+                <input type="radio" name="dsr" id="{{ dsr.id }}" value="{{ dsr.id }}" {% ifequal dsr.id|stringformat:'i' dsr_id %}  checked="checked" {% endifequal %}>
+                <label for="{{ dsr.id }}"> {{ dsr.username }}</label>
+            </p>
+        {% endfor %}
+        </div>
+            <div class="col-md-6 col-md-pull-6">
             <input type="submit" value="Get Gatepass" class="btn btn-success">
-        </form>
-    </div>
-    </div>
-{#    <h3>Grouping By Route</h3>#}
-{#    {% regroup gpass|dictsort:'customer.route_tag' by customer.route_tag as routlist %}#}
-{#    {% for so in routlist %}#}
-{#        RouteTag:{{ so.grouper }} <br>#}
-{#        {% for s in so.list %}#}
-{#            Sale Order{{ s }} <br>#}
-{#        {% endfor %}#}
-{#    {% endfor %}#}
+                <div class="form-group">
+                <input type="text" id="datepicker" name="asked_day" value="{{ asked_day }}" placeholder="yyyy/mm/dd" class="form-control">
+            </div>
+            </div>
+        </form><hr>
+</div> <!--row-->
 
+    <h1 class="hidden-print">Gatepass Detail</h1>
 
-    {% regroup gpass|dictsort:'customer.name' by customer.name as customer_list %}
-    <h3>Orders for {{ asked_day|date:'l F j, Y' }}</h3>
-    {% for customer in customer_list %}
-       <h3 class="btn-warning"> Shop: {{ customer.grouper }}</h3>
-            <ul>
-                {% for sale_order in customer.list %}
-                    <h4>{{ sale_order }}</h4>
-                    <table class="table table-bordered table-responsive table-striped">
-                    <thead>
-                    <tr class="bg-success">
-                        <th>Product</th>
-                        <th>Quantity(box,piece)</th>
-                        <th>Qty(Nos.)</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in sale_order.sale_line_items.all %}
-                            <tr>
-                                <td>{{ item.product }}</td>
-                                <td>{{ item.to_box }}</td>
-                                <td>{{ item.quantity }}</td>
-                            </tr>
-                        {% endfor %}
+    {% regroup gatepass by username as orders %}
+    <div class="row">
+    {% for order in orders %}
+    <div class="col-xs-4">
+    <h5>{{ order.grouper|capfirst }}</h5>
+        <ul class="leaders">
+        {% for item in order.list %}
+            <li>{{ forloop.counter }}. <span>{{ item.sale__sale_line_items__product__name }}</span>
+                <span>{{ item.total|to_box:item.sale__sale_line_items__product__quantity_per_unit }}</span>
+            </li>
+        {% endfor %}
+        </ul>
+        {% cycle '</div>' '</div>' '</div>' %}
 
-                    </tbody>
-                    </table>
-
-                {% endfor %}
-            </ul>
     {% empty %}
-        <h3 class="bg-info">No orders for {{ asked_day|date:"SHORT_DATE_FORMAT" }} </h3>
+        <h3>No sale for {{ day|date:'l, d M. Y' }}</h3>
     {% endfor %}
+     </div>{#.row#}
+
 {% endblock content %}
+
+
+
+
+
+
+
+
+
 {% block head_extra %}
       <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
@@ -66,7 +64,7 @@
     <script src="{% static 'js/jquery-ui.min.js' %}"></script>
 <script>
 $( "#datepicker" ).datepicker({
-    dateFormat: "yy/mm/dd"
+    dateFormat: "yy-mm-dd"
 });
 </script>
 {% endblock js_extra %}

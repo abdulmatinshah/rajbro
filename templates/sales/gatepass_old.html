@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags staticfiles mytags %}
+{% block content %}
+<h1>gpass</h1>
+   <p> {{ gpass }}</p>
+   <p> {{ gpass2 }}</p>
+    <hr>
+    <h1>sales reps</h1>
+    <p>asked day: {{ asked_day }}</p>
+{{ sale_reps }}
+    <hr>
+    dsr id: {{ dsr_id }}
+<form action="" method="post" class="form-inline">
+            {% csrf_token %}
+        <h3>Sales Represenatives</h3>
+        <p><input type="radio" name="dsr" value="0" id="all" {% ifequal '0' dsr_id %}  checked="checked" {% endifequal %}>
+            <label for="all">All</label>
+        </p>
+            {% for dsr in sale_reps %}
+            <p>
+                <input type="radio" name="dsr" id="{{ dsr.id }}" value="{{ dsr.id }}" {% ifequal dsr.id|stringformat:'i' dsr_id %}  checked="checked" {% endifequal %}>
+                <label for="{{ dsr.id }}">{{ dsr.username }}</label>
+            </p>
+        {% endfor %}
+            <div class="form-group">
+                <input type="text" id="datepicker" name="asked_day" value="{{ asked_day }}" placeholder="yyyy/mm/dd" class="form-control">
+            </div>
+            <input type="submit" value="Get Invoice" class="btn btn-success">
+        </form>
+
+    <hr>
+{{ r }}
+    <h1>dict(int)</h1>
+    {% for s in r %}
+        {{ s.item.0 }} : {{ s.amount|to_box:s.item.1  }}<br>
+
+    {% endfor %}
+
+    <h1>Grouping</h1>
+
+    {% regroup r by r.sale_rep as item_set %}
+{% for rep in item_set %}
+    {{ rep.grouper }}
+    {% for i in rep.list %}
+        {{ i.item.0 }} : {{ i.amount|to_box:i.item.1  }}<br>
+    {% endfor %}
+{% endfor %}
+{#   dsr -> sale -> lineitem #}
+{#<div class="row">#}
+{#    {% for g in gpass %}#}
+{#        <p>{{ g }}</p>#}
+{#        {% for i in g.sale_line_items.all %}#}
+{#            {{ i }}:{{ i.product.name }}({{ i.linetotal }})#}
+{#        {% endfor %}#}
+{#    {% endfor %}#}
+{##}
+{##}
+{#</div>#}
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+{% block head_extra %}
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+{% endblock head_extra %}
+{% block js_extra %}
+{#<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>#}
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script>
+$( "#datepicker" ).datepicker({
+    dateFormat: "yy-mm-dd"
+});
+</script>
+{% endblock js_extra %}

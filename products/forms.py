@@ -75,5 +75,5 @@ class ProductForm(forms.ModelForm):
 ProductFormSet = forms.modelformset_factory(
    Product,
    fields=['name', 'weight', 'quantity_per_unit', 'purchase_rate', 'sale_rate', 'discontinued'],
-   extra=0,
+   extra=1,
 )

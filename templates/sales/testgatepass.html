@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags staticfiles mytags %}
+{% block content %}
+<h1>Test Gatepass</h1>
+   {{ result }}
+    <hr>
+
+    {% for s in result %}
+   item: {{ s.sale__sale_line_items__product__name }}: {{ s.s }}
+    {% endfor %}
+
+
+    <h1>Grouping</h1>
+
+    {% regroup result by username as orders %}
+    {% for order in orders %}
+    <h2>{{ order.grouper }}</h2>
+        {% for item in order.list %}
+        <p>{{ item.sale__sale_line_items__product__name }}={{ item.s|to_box:item.sale__sale_line_items__product__quantity_per_unit }}</p>
+        {% endfor %}
+
+    {% endfor %}
+{% endblock content %}
+{% block head_extra %}
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+{% endblock head_extra %}
+{% block js_extra %}
+{#<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>#}
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script>
+$( "#datepicker" ).datepicker({
+    dateFormat: "yy-mm-dd"
+});
+</script>
+{% endblock js_extra %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Sale by Customer</h1>
+{% regroup object_list by customer as customer_wise_list %}
+{% for customer in customer_wise_list %}
+<h3>{{ customer.grouper }}</h3>
+   <table class="table table-bordered table-responsive table-striped">
+   <thead>
+   <tr class="bg-success">
+       <th>Order No.</th>
+       <th>DSR</th>
+       <th>Amount(Rs.)</th>
+       <th>Action</th>
+   </tr>
+   </thead>
+   <tbody>
+    {% for sale in customer.list %}
+        <tr>
+        <td>{{ sale.id }}: {{ sale.sale_date }}</td>
+        <td>{{ sale.sales_rep }}</td>
+        <td>{{ sale.amount }}</td>
+        <td><a href="{% url 'sales:create_order' id=sale.id %}" class="btn btn-warning">Edit</a></td>
+        </tr>
+
+    {% endfor %}
+   </tbody>
+   </table>
+{% endfor %}
+{% endblock content %}

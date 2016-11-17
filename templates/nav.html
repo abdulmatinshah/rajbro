@@ -48,10 +48,14 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sales <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li class="{% dropdown_active request 'sales:' %}"><a href="{% url 'sales:list' %}">All sales</a></li>
+                <li class="{% dropdown_active request 'sales:by_date' %}"><a href="{% url 'sales:sale_by_date' %}">Sale by Date</a></li>
+                <li class="{% dropdown_active request 'sales:by_customer' %}"><a href="{% url 'sales:sale_by_customer' %}">Sale By Customer</a></li>
                 <li class="{% dropdown_active request 'sales:create_order' %}"><a href="{% url 'sales:create_order' %}">New Sale</a></li>
                 <li role="separator" class="divider"></li>
                 <li class="dropdown-header">Nav header</li>
+                <li  class="{% dropdown_active request 'sales:invoice' %}"><a href="{% url 'sales:invoice' %}">Invoice</a></li>
                 <li  class="{% dropdown_active request 'sales:gatepass' %}"><a href="{% url 'sales:gatepass' %}">Gatepass</a></li>
+                <li  class="{% dropdown_active request 'sales:testgatepass' %}"><a href="{% url 'sales:testgatepass' %}">TestGatepass</a></li>
                 <li><a href="#">One more separated link</a></li>
               </ul>
             </li>

@@ -1,29 +1,31 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Sales Orders</h1>
-    <table class="table table-bordered table-responsive table-striped">
+    <h1>Sale By Date</h1>
+{% regroup object_list by sale_date as customer_wise_list %}
+{% for sale_date in customer_wise_list %}
+<h3>{{ sale_date.grouper }}</h3>
+   <table class="table table-bordered table-responsive table-striped">
    <thead>
    <tr class="bg-success">
        <th>Order No.</th>
-       <th>Amount(Rs.)</th>
-       <th>Customer</th>
        <th>DSR</th>
+       <th>Amount(Rs.)</th>
        <th>Action</th>
    </tr>
    </thead>
    <tbody>
-    {% for sale_order in object_list %}
+    {% for sale in sale_date.list %}
         <tr>
-            <td>{{ sale_order.id }}</td>
-            <td>{{ sale_order.amount }}</td>
-            <td>{{ sale_order.customer }}</td>
-            <td>{{ sale_order.sales_rep }}</td>
-            <td><a href="{% url 'sales:create_order' id=sale_order.id %}" class="btn btn-warning">Edit</a></td>
+        <td>{{ sale.customer }} (Order#: {{ sale.id }})</td>
+        <td>{{ sale.sales_rep|capfirst }}</td>
+        <td>{{ sale.amount }}</td>
+        <td><a href="{% url 'sales:create_order' id=sale.id %}" class="btn btn-warning">Edit</a></td>
         </tr>
-    {% endfor %}
-</tbody>
-   </table>
 
+    {% endfor %}
+   </tbody>
+   </table>
+{% endfor %}
 
 <div class="pagination">
     <span class="page-links">
@@ -38,5 +40,4 @@
         {% endif %}
     </span>
 </div>
-
 {% endblock content %}

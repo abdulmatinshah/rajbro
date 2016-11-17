@@ -57,3 +57,10 @@ def dropdown_active(request, url):
 #
 #     print(value.)
 #     return value + 2000
+
+@register.filter
+def to_box(value, factor):
+    if value:
+    # return value // factor
+        r = divmod(value, factor)
+        return '{},{}'.format(r[0],r[1])
