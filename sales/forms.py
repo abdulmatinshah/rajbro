@@ -58,7 +58,7 @@ ItemFormSet = forms.modelformset_factory(
 
 
 class SaleForm(forms.ModelForm):
-    
+
     class Meta:
         model = Sale
         exclude = ['post_items']
