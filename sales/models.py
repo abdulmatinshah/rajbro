@@ -5,6 +5,8 @@ from django.conf import settings
 from django.urls import reverse
 from rajbro.mixins import ToBoxMixin
 
+from django.db.models import F
+
 
 class Sale(models.Model):
     customer = models.ForeignKey(Customer)
@@ -12,9 +14,6 @@ class Sale(models.Model):
     sale_date = models.DateField(auto_now_add=True)
     amount = models.DecimalField(max_digits=100, decimal_places=2, default=0)
     post_items = models.BooleanField(default=False)
-
-    # class Meta:
-    #     ordering = ['-sale_date']
 
     def save(self):
         self.amount = self.sale_line_items.aggregate(linetotal=models.Sum('linetotal'))['linetotal']
@@ -29,33 +28,103 @@ class Sale(models.Model):
         return reverse('sales:create_order', kwargs={'id': self.id})
 
 
-class SaleLineItem(ToBoxMixin, models.Model):
+class SaleLineItem(models.Model):
     sale_order = models.ForeignKey(Sale, related_name='sale_line_items')
     product = models.ForeignKey(Product, related_name='sale_line_items')
     quantity = models.PositiveIntegerField()
-    linetotal = models.DecimalField(max_digits=100, decimal_places=2, help_text='Rs.', default=0)
+    free_pieces = models.PositiveIntegerField(null=True, blank=True)
     quantity_returned = models.PositiveIntegerField(null=True, blank=True)
+    linetotal = models.DecimalField(max_digits=100, decimal_places=2, help_text='Rs.', default=0)
+    stale = models.PositiveIntegerField(null=True, blank=True)
     posted = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+        print(self.quantity_returned,'qrtnd')
         if self.id:
-            prev_qty = SaleLineItem.objects.get(id=self.id).quantity
-            if prev_qty != self.quantity:
-                diff = prev_qty - self.quantity
-                self.product.units_in_stock += diff
+            obj = SaleLineItem.objects.get(id=self.id)
+            if self.quantity is None:
+                self.quantity = 0
+            if self.free_pieces is None:
+                self.free_pieces = 0
+            if self.quantity_returned is None:
+                self.quantity_returned = 0
+            if obj.quantity is None:
+                obj.quantity = 0
+            if obj.free_pieces is None:
+                obj.free_pieces = 0
+            if obj.quantity_returned is None:
+                obj.quantity_returned = 0
+
+            prev_line_item_qty = (obj.quantity + obj.free_pieces) - obj.quantity_returned
+            current_line_item_qty = (self.quantity + self.free_pieces) - self.quantity_returned
+
+            if prev_line_item_qty != current_line_item_qty:
+                diff = prev_line_item_qty - current_line_item_qty
+                self.product.units_in_stock = F('units_in_stock')+diff
                 self.product.save()
-        # else:
-            # print('def save LineItem  no id of line item')
+        else:
+            print('def save LineItem  no id of line item')
         super().save(*args, **kwargs)
 
     def __str__(self):
         return 'SaleLineItem {}'.format(self.id)
 
+    @property
+    def to_box(self):
+        boxes, pieces = divmod(self.quantity, self.product.quantity_per_unit)
+        return '{},{}'.format(boxes, pieces)
 
-    # def _get_calculated_linetotal(self):
-    #     return self.quantity * self.product.sale_rate
-    #
-    # calculated_linetotal = property(_get_calculated_linetotal)
+    def to_quantity_from_box(self, value, prod):
+        # value=(2,3), prod=1
+        if hasattr(self, 'product'):
+            self._multiplier = self.product.quantity_per_unit
+        else:
+            from products.models import Product
+            product = Product.objects.get(id=prod)
+            self._multiplier = product.quantity_per_unit
+
+        p, b = 0, 0
+        new_list = value.split(',')
+        try:
+            b = int(new_list[0])
+            p = int(new_list[1])
+        except ValueError:
+            pass
+        except IndexError:
+            pass
+        total_pieces = b * self._multiplier + p
+
+        self.quantity = total_pieces
+
+    @property
+    def returned(self):
+        boxes, pieces = divmod(self.quantity_returned, self.product.quantity_per_unit)
+        return '{},{}'.format(boxes, pieces)
+
+    def to_quantity_returned_from_box(self, value, prod):
+        # value=(2,3), prod=1
+        print(value,'qqqqqqqqqqqqqqqqqqqq value')
+
+        if hasattr(self, 'product'):
+            self._multiplier = self.product.quantity_per_unit
+        else:
+            from products.models import Product
+            product = Product.objects.get(id=prod)
+            self._multiplier = product.quantity_per_unit
+
+        p, b = 0, 0
+        new_list = value.split(',')
+        try:
+            b = int(new_list[0])
+            p = int(new_list[1])
+        except ValueError:
+            pass
+        except IndexError:
+            pass
+        total_pieces = b * self._multiplier + p
+        print(total_pieces,'qqqqqqqqqqqqqqqqqqqq result')
+
+        self.quantity_returned = total_pieces
 
 
 from django.db.models.signals import pre_save
@@ -64,24 +133,7 @@ from django.dispatch import receiver
 
 @receiver(pre_save, sender=SaleLineItem)
 def update_linetotal(sender, instance, *args, **kwargs):
-    instance.linetotal = instance.quantity * instance.product.sale_rate
-
-
-# @receiver(post_save, sender=Sale)
-# def update_product_quantity(sender, instance, **kwargs):
-#     if instance.post_items:
-#         items = instance.sale_line_items.all()
-#         for item in items:
-#             if not item.posted:
-#                 item.posted = True
-#                 item.save()
-#                 item.product.units_in_stock -= item.quantity
-#                 item.product.save()
-#     else:
-#         items = instance.sale_line_items.all()
-#         for item in items:
-#             if item.posted:
-#                 item.posting_status = False
-#                 item.save()
-#                 item.product.units_in_stock += item.quantity
-#                 item.product.save()
+    if instance.quantity_returned:
+        instance.linetotal = (instance.quantity - instance.quantity_returned) * instance.product.sale_rate
+    else:
+        instance.linetotal = instance.quantity * instance.product.sale_rate

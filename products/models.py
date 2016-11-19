@@ -61,7 +61,9 @@ def update_sale_product_quantity(sender, instance, created=False, **kwargs):
             if not item.posted:
                 item.posted = True
                 item.save()
-                item.product.units_in_stock -= item.quantity
+                net_quantity = (item.quantity + item.free_pieces) - item.quantity_returned
+                item.product.units_in_stock -= net_quantity
+
                 item.product.save()
     else:
         for item in items:

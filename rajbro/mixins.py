@@ -35,21 +35,17 @@ class ToBoxMixin(object):
 
     @to_box.setter
     def to_box(self, value):
-        print(self.id, 'is my id mixin')
-        #value '9.9'
-
+        #value '9,9'
         new_list = value.split(',')
-        print(value,' to_box mixin 000000000000', new_list)
+        # print(value,' to_box mixin 000000000000', new_list)
         try:
             b = int(new_list[0])
         except ValueError:
             b = 0
-            print('index error')
         try:
             p = int(new_list[1])
         except IndexError:
             p = 0
-            print('index error')
 
         print('to_box setter Mixin b{} - p{}, value{}'.format(b,p, new_list))
         total_pieces = (b * self._multiplier) + p
@@ -58,8 +54,8 @@ class ToBoxMixin(object):
         # int_list = list(map(int, value.split(',', 1),))
         # print(int_list)
         # total_pieces = reduce((lambda x, y: x * multiplier + y), int_list)
-        self.quantity = total_pieces
-        return self.quantity
+
+        return total_pieces
 
     @property
     def to_pieces(self):
@@ -68,8 +64,6 @@ class ToBoxMixin(object):
         # '2,9'   reduce((lambda x,y: x*10+y), s) => '33333333'
         # list(map(int, s.split(','))) = [2,9]
         # reduce((lambda x, y: x * 10 + y), intlist)  => 29
-
-
 
         # multiplier = self.product.quantity_per_unit
         # int_list = list(map(int, self.to_box.split(',')))
@@ -86,8 +80,7 @@ class ToBoxMixin(object):
             pass
         total_pieces = b * self._multiplier + p
 
-        self.quantity = total_pieces
-        return self.quantity
+        return total_pieces
 
     def to_box_from_value(self, value, prod):
         if hasattr(self, 'product'):

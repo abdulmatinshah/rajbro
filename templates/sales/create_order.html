@@ -4,7 +4,7 @@
     <h3>Sale Order</h3>
 
     <form action="" method="post">
-    {% csrf_token %}
+        {% csrf_token %}
 
     {{ form }}
     <br>
@@ -13,11 +13,11 @@
         <thead>
         <tr class="bg-success">
             <th>Product</th>
-            <th>Quantity</th>
-            <th>To Box</th>
-            <th>Line Total</th>
-            <th>Quantity Returned</th>
-            <th>posted</th>
+            <th>Boxes(b,p)</th>
+            <th>Line Total(Rs.)</th>
+            <th>Free pieces (pieces)</th>
+            <th>Returned(b,p)</th>
+            <th>Stale(pieces)</th>
             <th>Delete</th>
         </tr>
         </thead>
@@ -25,18 +25,16 @@
         {% for form in formset %}
         <tr class="new-line-item">
         <td>{{ form.id }} {{ form.product }}</td>
-        <td>{{ form.instance.quantity|default_if_none:'0' }}</td>
         <td>{{ form.to_box }}</td>
         <td>{{ form.linetotal }}</td>
-        <td>{{ form.quantity_returned }}</td>
-        <td>{{ form.posted }}</td>
+        <td>{{ form.free_pieces }}</td>
+        <td>{{ form.returned }}</td>
+        <td>{{ form.stale }}</td>
         <td>{{ form.DELETE }}</td>
         </tr>
     {% endfor %}
         </tbody>
     </table>
-
-
         <input type="submit" value="Save" class="btn bg-success">
     </form>
 {% endblock content %}

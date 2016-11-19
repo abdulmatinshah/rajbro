@@ -62,6 +62,7 @@ def create_order(request, id=None):
                 so.save()
             else:
                 print('formset invalid')
+                raise ValueError('Incorrect value')
                 print(formset.errors)
             # except ObjectDoesNotExist:
             #     print('object does not exist', formset.errors)
