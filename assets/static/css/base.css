@@ -32,3 +32,13 @@ ul.leaders span + span {
     float: right;
     padding-left: 0.33em;
     background: white}
+
+
+table {
+    table-layout: fixed;
+    word-wrap:break-word;
+    overflow: hidden;
+}
+table input {
+    width: 100%;
+}

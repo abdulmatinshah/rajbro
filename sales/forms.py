@@ -1,8 +1,13 @@
 from django import forms
-from sales.models import SaleLineItem, Sale
+from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 
+from sales.models import SaleLineItem, Sale
+from customers.models import Customer
 
 class ItemForm(forms.ModelForm):
+    # to_box = forms.CharField(max_length=10, required=False, label='Boxes,Pieces', validators=[RegexValidator(regex='^\d+\,\d+$', message='should be boxes, pieces')])
+    # returned = forms.CharField(max_length=10, required=False, label='Returned,Pieces', validators=[RegexValidator(regex='^\d+\,\d+$', message='should be boxes, pieces')])
     to_box = forms.CharField(max_length=10, required=False, label='Boxes,Pieces')
     returned = forms.CharField(max_length=10, required=False, label='Returned,Pieces')
 
@@ -18,6 +23,7 @@ class ItemForm(forms.ModelForm):
             self.fields['to_box'].widget.attrs['value'] = self.instance.to_box
             self.fields['returned'].widget.attrs['value'] = self.instance.returned
         else:
+            # self.fields['linetotal'].widget.attrs['required'] = None
             print('sale_order form: no self.product')
 
     class Meta:
@@ -25,7 +31,6 @@ class ItemForm(forms.ModelForm):
         fields = '__all__'
 
     def clean_to_box(self):
-        # value = self.instance.to_pieces
         boxes = self['to_box'].value()
         # lineitem = getattr(self, 'instance', None)
         # if not lineitem.id:
@@ -59,9 +64,28 @@ ItemFormSet = forms.modelformset_factory(
 
 class SaleForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        # print(self.user.__dict__,'kkkkkkkkkk')
+
+        super().__init__(*args, **kwargs)
+        self.fields['amount'].widget.attrs['readonly'] = True
+        if self.user.is_superuser:
+            qs = Customer.objects.only('id', 'name')
+        else:
+            qs = Customer.objects.filter(sales_rep=self.user).only('id', 'name')
+            self.fields['sales_rep'].widget.attrs['readonly'] = True
+
+        self.fields['customer'].queryset = qs
+
+    # customer_choice_field = forms.ModelChoiceField(queryset=None, empty_label=None)
+
+    # noinspection PyPackageRequirements,PyPackageRequirements
     class Meta:
         model = Sale
-        exclude = ['post_items']
+        # exclude = ['post_items']
+        fields = ['sales_rep','customer', 'amount',]
+
 
 
 

@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from customers.models import Customer
 from products.models import Product
@@ -10,10 +11,11 @@ from django.db.models import F
 
 class Sale(models.Model):
     customer = models.ForeignKey(Customer)
-    sales_rep = models.ForeignKey(settings.AUTH_USER_MODEL)
+    # sales_rep = models.ForeignKey(settings.AUTH_USER_MODEL)
+    sales_rep = models.ForeignKey(User)
     sale_date = models.DateField(auto_now_add=True)
     amount = models.DecimalField(max_digits=100, decimal_places=2, default=0)
-    post_items = models.BooleanField(default=False)
+    # post_items = models.BooleanField(default=False)
 
     def save(self):
         self.amount = self.sale_line_items.aggregate(linetotal=models.Sum('linetotal'))['linetotal']
@@ -34,7 +36,7 @@ class SaleLineItem(models.Model):
     quantity = models.PositiveIntegerField()
     free_pieces = models.PositiveIntegerField(null=True, blank=True)
     quantity_returned = models.PositiveIntegerField(null=True, blank=True)
-    linetotal = models.DecimalField(max_digits=100, decimal_places=2, help_text='Rs.', default=0)
+    linetotal = models.DecimalField(max_digits=100, decimal_places=2, help_text='Rs.', blank=True)
     stale = models.PositiveIntegerField(null=True, blank=True)
     posted = models.BooleanField(default=False)
 
@@ -59,12 +61,12 @@ class SaleLineItem(models.Model):
             current_line_item_qty = (self.quantity + self.free_pieces) - self.quantity_returned
 
             if prev_line_item_qty != current_line_item_qty:
-                diff = prev_line_item_qty - current_line_item_qty
-                self.product.units_in_stock = F('units_in_stock')+diff
-                self.product.save()
+                diff = current_line_item_qty - prev_line_item_qty
         else:
-            print('def save LineItem  no id of line item')
+            diff = (self.quantity + self.free_pieces) - self.quantity_returned
         super().save(*args, **kwargs)
+        self.product.units_in_stock = F('units_in_stock') - diff
+        self.product.save()
 
     def __str__(self):
         return 'SaleLineItem {}'.format(self.id)
@@ -74,8 +76,14 @@ class SaleLineItem(models.Model):
         boxes, pieces = divmod(self.quantity, self.product.quantity_per_unit)
         return '{},{}'.format(boxes, pieces)
 
+    @property
+    def returned_to_box(self):
+        boxes, pieces = divmod(self.quantity_returned, self.product.quantity_per_unit)
+        return '{},{}'.format(boxes, pieces)
+
     def to_quantity_from_box(self, value, prod):
         # value=(2,3), prod=1
+
         if hasattr(self, 'product'):
             self._multiplier = self.product.quantity_per_unit
         else:
@@ -103,7 +111,6 @@ class SaleLineItem(models.Model):
 
     def to_quantity_returned_from_box(self, value, prod):
         # value=(2,3), prod=1
-        print(value,'qqqqqqqqqqqqqqqqqqqq value')
 
         if hasattr(self, 'product'):
             self._multiplier = self.product.quantity_per_unit
@@ -122,7 +129,6 @@ class SaleLineItem(models.Model):
         except IndexError:
             pass
         total_pieces = b * self._multiplier + p
-        print(total_pieces,'qqqqqqqqqqqqqqqqqqqq result')
 
         self.quantity_returned = total_pieces
 

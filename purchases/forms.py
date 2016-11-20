@@ -12,6 +12,7 @@ class PurchaseOrderForm(forms.ModelForm):
         }
 
 class LineItemForm(forms.ModelForm):
+    to_box = forms.CharField(max_length=10, required=False, label='Boxes,Pieces')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,22 +25,21 @@ class LineItemForm(forms.ModelForm):
 
         # self.fields['product'].widget.attrs['disabled'] = True
         # self.fields['product'].widget.attrs['required'] = False
+        self.fields['subtotal'].widget.attrs['readonly'] = True
+        if hasattr(instance, 'product'):
+            self.fields['to_box'].widget.attrs['value'] = self.instance.to_box
+
     class Meta:
         model = LineItem
-        fields = ['product', 'quantity', 'subtotal','quantity_returned']
+        fields = ['product', 'to_box', 'subtotal']
 
-    # def clean(self):
-        # cleaned_data = super().clean()
-        # print(cleaned_data.get('quantity'), 'from cleaned data', type(cleaned_data))
-        # if cleaned_data.get('quantity') is None:
-        #    p = cleaned_data.pop('product')
-        #    cleaned_data.update({'product': {'value': None}})
-        # q= self['quantity'].value()
-        # if not q:
-        #     print(cleaned_data.get('product'))
-        #
-        #     print('---------------------------', q, p)
-        # return cleaned_data
+    def clean_to_box(self):
+        boxes = self['to_box'].value()
+        product = self['product'].value()
+        self.instance.to_quantity_from_box(boxes, product)
+        # else:
+        #     self.instance.to_box_from_value(data)
+        return boxes
 
 
 
@@ -54,7 +54,7 @@ LineItemInlineFormSet = forms.inlineformset_factory(
     LineItem,
     form=LineItemForm,
     # formset=LineItemFormSet,
-    fields=['product', 'quantity', 'subtotal', 'quantity_returned'],
+    fields=['product', 'to_box','subtotal' ],
     # can_delete=True,
     # can_order=True,
     extra=1,

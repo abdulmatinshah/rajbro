@@ -4,7 +4,7 @@
 
     <div class="row">
     <div class="col-sm-6">
-        <h1>Invoices</h1>
+        <h1>Invoices for {{ asked_day|date:'M. j, Y' }}</h1>
     </div>
     <div class="col-sm-6">
         <form action="" method="post" class="form-inline pull-right">
@@ -16,18 +16,19 @@
     </div>
 
     {% regroup invoice|dictsort:'customer.name' by customer.name as customer_list %}
-    <h3>Orders for {{ asked_day|date:'l F j, Y' }}</h3>
     {% for customer in customer_list %}
-       <h3 class="btn-warning"> Shop: {{ customer.grouper }}</h3>
+       <h4 class="bg-primary"> M/S: {{ customer.grouper }}</h4>
             <ul>
                 {% for sale_order in customer.list %}
-                    <h4>{{ sale_order }}</h4>
-                    <table class="table table-bordered table-responsive table-striped">
+                    <h5>Order No. {{ sale_order.id }} ({{ sale_order.sale_date|date:'d/m/Y' }})</h5>
+                    <table class="table table-bordered table-responsive table-striped table-condensed">
                     <thead>
                     <tr class="bg-success">
                         <th>Product</th>
-                        <th>Quantity(box,piece)</th>
-                        <th>Qty(Nos.)</th>
+                        <th>Quantity (box,piece)</th>
+                        <th>Free Pieces</th>
+                        <th>Returned (box,piece)</th>
+                        <th>Subtotal (Rs.)</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -35,9 +36,15 @@
                             <tr>
                                 <td>{{ item.product }}</td>
                                 <td>{{ item.to_box }}</td>
-                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.free_pieces }}</td>
+                                <td>{{ item.returned_to_box }}</td>
+                                <td>{{ item.linetotal }}</td>
                             </tr>
                         {% endfor %}
+                        <tr class="text-primary bg-warning">
+                            <td colspan="4">Bill Total (Rs.)</td>
+                            <td>{{ sale_order.amount }}</td>
+                        </tr>
 
                     </tbody>
                     </table>
@@ -45,7 +52,7 @@
                 {% endfor %}
             </ul>
     {% empty %}
-        <h3 class="bg-info">No orders for {{ asked_day|date:"SHORT_DATE_FORMAT" }} </h3>
+        <h3 class="bg-info">No orders for {{ asked_day|date:"d/m/Y" }} </h3>
     {% endfor %}
 {% endblock content %}
 {% block head_extra %}

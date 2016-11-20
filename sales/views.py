@@ -2,8 +2,9 @@ from functools import reduce
 from heapq import merge
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, get_object_or_404, HttpResponseRedirect
-from django.views.generic import ListView
+from django.core.urlresolvers import reverse_lazy
+from django.shortcuts import render, get_object_or_404, HttpResponseRedirect, redirect
+from django.views.generic import ListView, DeleteView
 from .models import Sale, SaleLineItem
 from .forms import SaleForm, ItemInlineFormSet, TestItemForm, DailySaleFormSet
 from django.contrib import messages
@@ -25,21 +26,34 @@ class SaleByDate(ListView):
     ordering = ['sale_date']
     template_name = 'sales/sale_by_date.html'
 
+class SaleDelete(DeleteView):
+    model = Sale
+    success_url = reverse_lazy('sales:list')
+
+    def get(self, request, *args, **kwargs):
+        print('reached in get of delete view')
+    #     obj = self.get_object()
+    #     if not obj.amount > 0:
+    #         messages.warning(request, 'This order is posted and items have been added to inventory. Unpost items and then you can deleting it.')
+    #         return redirect('sales:list')
+        return super().get(request, *args, **kwargs)
+
 
 def create_order(request, id=None):
-
+    user = request.user
     if id:
         so = get_object_or_404(Sale, pk=id)
         qs = so.sale_line_items.all()
     else:
         so = Sale(sales_rep=request.user)
         qs = so.sale_line_items.none()
-    form = SaleForm(instance=so)
+
+    form = SaleForm(user=user, instance=so)
     formset = DailySaleFormSet(instance=so)
 
     if request.method == 'POST':
 
-        form = SaleForm(request.POST, instance=so)
+        form = SaleForm(request.POST, instance=so, user=user)
         formset = DailySaleFormSet(request.POST, instance=so)
         if form.is_valid():
             so = form.save(commit=False)
@@ -62,6 +76,7 @@ def create_order(request, id=None):
                 so.save()
             else:
                 print('formset invalid')
+
                 raise ValueError('Incorrect value')
                 print(formset.errors)
             # except ObjectDoesNotExist:

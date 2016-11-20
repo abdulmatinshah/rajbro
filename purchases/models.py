@@ -23,10 +23,6 @@ class PurchaseOrder(models.Model):
     def get_absolute_url(self):
         return reverse('purchases:edit_order', kwargs={'id': self.id})
 
-    def get_line_items(self):
-        if self.line_items:
-            # output = ', '.join([i.product.name for i in self.line_items.all()])
-            return self.line_items.count()
 
     @property
     def order_total(self):
@@ -39,21 +35,45 @@ class LineItem(models.Model):
     product = models.ForeignKey(Product, related_name='line_items')
     quantity = models.PositiveIntegerField()
     subtotal = models.DecimalField(max_digits=100, decimal_places=2, help_text='Rs.', blank=True)
-    quantity_returned = models.PositiveIntegerField(null=True, blank=True)
+    # quantity_returned = models.PositiveIntegerField(null=True, blank=True)
     posted = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.purchase_order.purchase_date)
 
     @property
-    def to_boxes(self):
+    def to_box(self):
         boxes, pieces = divmod(self.quantity, self.product.quantity_per_unit)
-        return '%s,%s' % (boxes, pieces)
+        return '{},{}'.format(boxes, pieces)
 
-    def _get_calculated_linetotal(self):
-        return self.quantity * self.product.sale_rate
+    def to_quantity_from_box(self, value, prod):
+        # value=(2,3), prod=1
+        if hasattr(self, 'product'):
+            self._multiplier = self.product.quantity_per_unit
+        else:
+            from products.models import Product
+            product = Product.objects.get(id=prod)
+            self._multiplier = product.quantity_per_unit
 
-    calculated_subtotal = property(_get_calculated_linetotal)
+        p, b = 0, 0
+        new_list = value.split(',')
+        try:
+            b = int(new_list[0])
+            p = int(new_list[1])
+        except ValueError:
+            pass
+        except IndexError:
+            pass
+        total_pieces = b * self._multiplier + p
+
+        self.quantity = total_pieces
+
+
+
+    # def _get_calculated_linetotal(self):
+    #     return self.quantity * self.product.sale_rate
+    #
+    # calculated_subtotal = property(_get_calculated_linetotal)
 
 from django.db.models.signals import pre_save
 from django.dispatch import receiver

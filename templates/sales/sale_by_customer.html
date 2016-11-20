@@ -17,7 +17,7 @@
     {% for sale in customer.list %}
         <tr>
         <td>{{ sale.id }}: {{ sale.sale_date }}</td>
-        <td>{{ sale.sales_rep }}</td>
+        <td>{{ sale.sales_rep|capfirst }}</td>
         <td>{{ sale.amount }}</td>
         <td><a href="{% url 'sales:create_order' id=sale.id %}" class="btn btn-warning">Edit</a></td>
         </tr>

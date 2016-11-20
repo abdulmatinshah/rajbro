@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -18,4 +19,5 @@ class Supplier(Vendor):
 
 
 class Customer(Vendor):
+    sales_rep = models.ForeignKey(settings.AUTH_USER_MODEL)
     route_tag = models.CharField(max_length=10, null=False, unique=True)

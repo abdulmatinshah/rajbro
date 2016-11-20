@@ -24,7 +24,7 @@ class Product(ConvertUnitMixin, models.Model):
 
 from purchases.models import PurchaseOrder
 from sales.models import Sale
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 
@@ -55,7 +55,45 @@ def update_sale_product_quantity(sender, instance, created=False, **kwargs):
     # total = instance.sale_line_items.aggregate(Sum('quantity'))
     # print(total['quantity__sum'])
 
+    # items = instance.sale_line_items.all()
+    # for item in items:
+    #     item.save()
+    #     net_quantity = (item.quantity + item.free_pieces) - item.quantity_returned
+    #     item.product.units_in_stock -= net_quantity
+    #     item.product.save()
+
+
+
+
+    '''
+    for item in items:
+        if not item.posted:
+            item.posted = True
+            item.save()
+            net_quantity = (item.quantity + item.free_pieces) - item.quantity_returned
+            item.product.units_in_stock -= net_quantity
+            item.product.save()
+        else:
+            item.posted = False
+            item.save()
+            item.product.units_in_stock += item.quantity
+            item.product.save()
+    '''
+
+
+@receiver(pre_delete, sender=Sale)
+def subtract_sale_product_quantity(sender, instance, created=False, **kwargs):
     items = instance.sale_line_items.all()
+    for item in items:
+        net_quantity = (item.quantity + item.free_pieces) - item.quantity_returned
+        item.product.units_in_stock += net_quantity
+        item.product.save()
+        item.delete()
+    print('reached bottom after deleting signal and updating product')
+
+
+''' Before deleting attribute post_items on Sale Model
+items = instance.sale_line_items.all()
     if instance.post_items:
         for item in items:
             if not item.posted:
@@ -72,4 +110,4 @@ def update_sale_product_quantity(sender, instance, created=False, **kwargs):
                 item.save()
                 item.product.units_in_stock += item.quantity
                 item.product.save()
-
+'''

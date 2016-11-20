@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form method="post">{% csrf_token %}
+   <div class="well">
+        Are you sure you want to delete "{{ object }}" ?
+   </div>
+
+    <div class="btn-group">
+        <input type="submit" value="Delete Permanently" class="btn btn-danger">
+        <a href="{% url 'sales:list' %}" class="btn btn-warning">Cancel</a>
+    </div>
+</form>
+
+{% endblock content %}

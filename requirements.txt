@@ -14,7 +14,7 @@ simplegeneric==0.8.1
 six==1.10.0
 traitlets==4.3.1
 wcwidth==0.1.7
-
+braces==1.10.0
 
 #gun
 gunicorn

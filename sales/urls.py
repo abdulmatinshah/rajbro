@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^$', views.SaleOrders.as_view(), name='list'),
     url(r'^by_date/$', views.SaleByDate.as_view(), name='sale_by_date'),
     url(r'^by_customer/$', views.SaleByCustomer.as_view(), name='sale_by_customer'),
+    url(r'^delete/(?P<pk>\d+)/$', views.SaleDelete.as_view(), name='delete'),
     url(r'^create_order/(?P<id>\d+)/$', views.create_order, name='create_order'),
     url(r'^create_order/$', views.create_order, name='create_order'),
     url(r'^test_form/$', views.test_form, name='test_form'),

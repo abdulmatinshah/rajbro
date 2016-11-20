@@ -14,11 +14,16 @@
    <tbody>
     {% for sale_order in object_list %}
         <tr>
-            <td>{{ sale_order.id }}</td>
+            <td>{{ sale_order.id }} <span class="small text-muted">({{ sale_order.sale_date|date:'d/m/Y' }})</span></td>
             <td>{{ sale_order.amount }}</td>
-            <td>{{ sale_order.customer }}</td>
-            <td>{{ sale_order.sales_rep }}</td>
-            <td><a href="{% url 'sales:create_order' id=sale_order.id %}" class="btn btn-warning">Edit</a></td>
+            <td>{{ sale_order.customer|capfirst }}</td>
+            <td>{{ sale_order.sales_rep|capfirst }}</td>
+            <td>
+               <div class="btn-group">
+                    <a href="{% url 'sales:create_order' id=sale_order.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'sales:delete' pk=sale_order.id %}" class="btn btn-danger btn-sm">Delete</a>
+               </div>
+            </td>
         </tr>
     {% endfor %}
 </tbody>

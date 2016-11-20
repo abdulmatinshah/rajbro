@@ -32,3 +32,8 @@ ul.leaders span + span {
     float: right;
     padding-left: 0.33em;
     background: white}
+
+td {
+  word-wrap:break-word;
+  word-break:break-all;
+}

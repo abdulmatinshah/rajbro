@@ -4,7 +4,7 @@
  <h2>Purchase Order</h2>
     <form action="" method="post">
     {% csrf_token %}
-        {{ form|crispy }}
+
         <h5>Order Total: {{ form.instance.order_total }}</h5>
     {{ formset.management_form }}
     <h3>Line Items</h3>
@@ -15,7 +15,6 @@
     <th>Product</th>
     <th>Quantity(Rs.)</th>
     <th>Subtotal</th>
-    <th>Return</th>
     <th>Action</th>
 </tr>
 </thead>
@@ -25,9 +24,8 @@
     <tr class="new-line-item">
         <td>{{ form.id }}{{ forloop.counter }}</td>
         <td>{{ form.product }}</td>
-        <td>{{ form.quantity }}</td>
+        <td>{{ form.to_box }}</td>
         <td>{{ form.subtotal }}</td>
-        <td>{{ form.quantity_returned }}</td>
         <td>
         {% if form.instance and form.instance.pk and form.instance.post_items %}
             {{ form.DELETE }}
@@ -37,6 +35,7 @@
         {% endfor %}
     </tbody>
 </table>
+    {{ form|crispy }}
         <input type="submit" value="Save" class="btn btn-primary">
     </form>
 

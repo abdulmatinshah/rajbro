@@ -10,7 +10,7 @@ class InlineSaleLineItem(admin.TabularInline):
 
 
 class SaleAdmin(admin.ModelAdmin):
-    list_display = ['sale_date', 'id', 'amount', 'post_items']
+    list_display = ['sale_date', 'id', 'amount']
     readonly_fields = ['amount', ]
     inlines = [InlineSaleLineItem, ]
 
