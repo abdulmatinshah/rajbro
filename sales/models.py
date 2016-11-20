@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.db import models
 from customers.models import Customer
 from products.models import Product
@@ -7,6 +8,7 @@ from django.urls import reverse
 from rajbro.mixins import ToBoxMixin
 
 from django.db.models import F
+
 
 
 class Sale(models.Model):
@@ -41,15 +43,17 @@ class SaleLineItem(models.Model):
     posted = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+        if self.quantity is None:
+            self.quantity = 0
+        if self.free_pieces is None:
+            self.free_pieces = 0
+        if self.quantity_returned is None:
+            self.quantity_returned = 0
         print(self.quantity_returned,'qrtnd')
+        diff = 0
         if self.id:
             obj = SaleLineItem.objects.get(id=self.id)
-            if self.quantity is None:
-                self.quantity = 0
-            if self.free_pieces is None:
-                self.free_pieces = 0
-            if self.quantity_returned is None:
-                self.quantity_returned = 0
+
             if obj.quantity is None:
                 obj.quantity = 0
             if obj.free_pieces is None:

@@ -5,7 +5,7 @@
     <form action="" method="post">
     {% csrf_token %}
 
-        <h5>Order Total: {{ form.instance.order_total }}</h5>
+        <h3>Order Total: {{ form.instance.order_total }}</h3>
     {{ formset.management_form }}
     <h3>Line Items</h3>
     <table class="table table-bordered table-responsive table-striped">
@@ -13,7 +13,7 @@
 <tr class="bg-success">
     <th>Sr.No.</th>
     <th>Product</th>
-    <th>Quantity(Rs.)</th>
+    <th>Quantity (box,piece)</th>
     <th>Subtotal</th>
     <th>Action</th>
 </tr>

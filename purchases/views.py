@@ -1,21 +1,25 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse_lazy
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView, DeleteView
+
+from braces import  views as bv
+
 from .models import PurchaseOrder, LineItem
 from .forms import PurchaseOrderForm, LineItemInlineFormSet
 
 
-class Purchases(ListView):
+class Purchases(bv.LoginRequiredMixin, ListView):
     model = PurchaseOrder
     queryset = PurchaseOrder.objects.prefetch_related('line_items')
 
 
-class PurchaseDetail(DetailView):
+class PurchaseDetail(bv.LoginRequiredMixin, DetailView):
     model = PurchaseOrder
 
 
-class PurchaseDelete(DeleteView):
+class PurchaseDelete(bv.LoginRequiredMixin, DeleteView):
     model = PurchaseOrder
     success_url = reverse_lazy('purchases:list')
 
@@ -26,7 +30,7 @@ class PurchaseDelete(DeleteView):
             return redirect('purchases:list')
         return super().get(request, *args, **kwargs)
 
-
+@login_required
 def purchase_order(request):
     form = PurchaseOrderForm()
 
@@ -69,6 +73,7 @@ def purchase_order(request):
     return render(request, 'purchases/order_form.html', context)
 
 
+@login_required
 def edit_purchase_order(request, id):
     po = get_object_or_404(PurchaseOrder, pk=id)
     form = PurchaseOrderForm(instance=po)
@@ -97,6 +102,7 @@ def edit_purchase_order(request, id):
     return render(request, 'purchases/order_form.html', context)
 
 
+@login_required
 def post_items(request, id):
     po = get_object_or_404(PurchaseOrder, id=id)
     po.post_items = True
@@ -105,6 +111,7 @@ def post_items(request, id):
     return redirect('purchases:list')
 
 
+@login_required
 def unpost_items(request, id):
     po = get_object_or_404(PurchaseOrder, id=id)
     po.post_items = False
@@ -113,6 +120,7 @@ def unpost_items(request, id):
     return redirect('purchases:list')
 
 
+@login_required
 def posting(request, posting_type):
     if posting_type =='post':
         messages.success(request, posting_type)

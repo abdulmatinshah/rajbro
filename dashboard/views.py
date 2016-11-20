@@ -63,21 +63,29 @@ class LoginView(
 ):
     form_class = LoginForm
     form_valid_message = "You've been successfully logged in"
-
-    success_url = reverse_lazy('dashboard')
+    success_url = reverse_lazy('home')
     template_name = 'dashboard/login.html'
 
     def form_valid(self, form):
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
-
         user = authenticate(username=username, password=password)
-        if user is not None and user.is_active():
+        if user is not None and user.is_active:
             login(self.request, user)
             return super().form_valid(form)
         else:
             return super().form_invalid(form)
 
 
-class LogoutView(bv.LoginRequiredMixin, generic.RedirectView):
+
+class LogoutView(
+    bv.LoginRequiredMixin,
+    bv.FormValidMessageMixin,
+    generic.RedirectView
+):
     url = reverse_lazy('home')
+
+    def get(self, request, *args, **kwargs):
+        logout(self.request)
+        messages.success(request, "You've been successfully logged out.")
+        return HttpResponseRedirect(reverse_lazy('home'))

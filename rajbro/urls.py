@@ -22,8 +22,8 @@ from accounts.views import login_view, logout_view
 
 urlpatterns = [
     url(r'^$', views.DashboardView.as_view(), name='home'),
-    url(r'^register$', views.RegisterView.as_view(), name='register'),
-    url(r'^login$', views.LoginView.as_view(), name='login'),
+    # url(r'^register/$', views.RegisterView.as_view(), name='register'),
+    url(r'^login/$', views.LoginView.as_view(), name='login'),
     url(r'^logout$', views.LogoutView.as_view(), name='logout'),
     url(r'^products/', include('products.urls', namespace='products')),
     url(r'^purchases/', include('purchases.urls', namespace='purchases')),

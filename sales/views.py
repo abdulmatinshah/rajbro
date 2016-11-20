@@ -8,25 +8,26 @@ from django.views.generic import ListView, DeleteView
 from .models import Sale, SaleLineItem
 from .forms import SaleForm, ItemInlineFormSet, TestItemForm, DailySaleFormSet
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from braces import views as bv
 
-
-class SaleOrders(ListView):
+class SaleOrders(bv.LoginRequiredMixin, ListView):
     model = Sale
     paginate_by = 10
 
 
-class SaleByCustomer(ListView):
+class SaleByCustomer(bv.LoginRequiredMixin, ListView):
     model = Sale
     ordering = ['customer']
     template_name = 'sales/sale_by_customer.html'
 
 
-class SaleByDate(ListView):
+class SaleByDate(bv.LoginRequiredMixin, ListView):
     model = Sale
     ordering = ['sale_date']
     template_name = 'sales/sale_by_date.html'
 
-class SaleDelete(DeleteView):
+class SaleDelete(bv.LoginRequiredMixin, DeleteView):
     model = Sale
     success_url = reverse_lazy('sales:list')
 
@@ -38,7 +39,7 @@ class SaleDelete(DeleteView):
     #         return redirect('sales:list')
         return super().get(request, *args, **kwargs)
 
-
+@login_required
 def create_order(request, id=None):
     user = request.user
     if id:
@@ -90,7 +91,7 @@ def create_order(request, id=None):
     }
     return render(request, 'sales/create_order.html', context)
 
-
+@login_required
 def test_form(request):
     so = Sale.objects.all().first()
     item = SaleLineItem.objects.all().first()
@@ -116,7 +117,7 @@ def test_form(request):
 from django.db.models import Sum
 from datetime import date, datetime
 
-
+@login_required
 def invoice(request, year=None, month=None, day=None):
     d=''
     if request.method == 'POST':
@@ -223,7 +224,7 @@ def gatepass(request, year=None, month=None, day=None):
 
     return render(request, 'sales/gatepass.html', context)
 '''
-
+@login_required
 def gatepass(request):
     asked_day = date.today()
     dsr_id = '0'
@@ -318,6 +319,7 @@ def gatepass(request, year=None, month=None, day=None):
 
     return render(request, 'sales/gatepass.html', context)
 '''
+@login_required
 def testgatepass(request):
     dsr = request.user
     # s = Sale.objects.prefetch_related('')
